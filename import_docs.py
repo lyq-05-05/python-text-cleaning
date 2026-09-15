@@ -11,6 +11,17 @@ def clean_text(text: str) -> str:
     cleaned_text = "\n".join(lines)
     return cleaned_text
 
+def get_skip_reason(cleaned_text: str, seen: set):
+  if not cleaned_text:
+    return "empty"
+
+  if len(cleaned_text) < 100:
+    return "too short" 
+  
+  if cleaned_text in seen:
+    return "duplicate"
+  
+  return None
 
 def collect_documents(base_dir: Path, input_dir: Path) -> tuple:
     documents = []
@@ -53,27 +64,16 @@ def collect_documents(base_dir: Path, input_dir: Path) -> tuple:
           "filename": item.name,
           "reason": "read_error"
         })
+        continue
 
       cleaned_text = clean_text(text)
 
-      if not cleaned_text:
-        skipped.append({
-          "filename": item.name,
-          "reason": "empty"
-        })
-        continue
-      
-      if len(cleaned_text) < 99:
-        skipped.append({
-          "filename": item.name,
-          "reason": "too_sort"
-        })
-        continue
+      reason = get_skip_reason(cleaned_text, seen)
 
-      if cleaned_text in seen:
+      if reason:
         skipped.append({
           "filename": item.name,
-          "reason": "duplicate"
+          "reason": reason
         })
         continue
       
