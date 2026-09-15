@@ -30,6 +30,13 @@ def collect_documents(base_dir: Path, input_dir: Path) -> tuple:
       if item.suffix.lower() != ".txt":
         continue
 
+      if "草稿" in item.name:
+        skipped.append({
+          "filename": item.name,
+          "reason": "draft"
+        })
+        continue
+
       try:
         with item.open(encoding= "utf-8") as f:
           text = f.read()
@@ -56,6 +63,13 @@ def collect_documents(base_dir: Path, input_dir: Path) -> tuple:
         })
         continue
       
+      if len(cleaned_text) < 99:
+        skipped.append({
+          "filename": item.name,
+          "reason": "too_sort"
+        })
+        continue
+
       if cleaned_text in seen:
         skipped.append({
           "filename": item.name,
